@@ -1,0 +1,32 @@
+[MASTER]
+ignore=__pycache__
+
+[MESSAGES CONTROL]
+disable=
+    C0114,  # missing-module-docstring
+    C0115,  # missing-class-docstring
+    C0116,  # missing-function-docstring
+    R0903,  # too-few-public-methods (data holders)
+    E0401,  # import-error (optional waveshare drivers)
+    C0303,  # trailing-whitespace (handled by formatter)
+    C0411,  # wrong-import-order (path injection needed)
+    C0413,  # wrong-import-position (path injection needed)
+    C0415,  # import-outside-toplevel (runtime optional imports)
+    W1203,  # logging-fstring-interpolation
+    W0718,  # broad-exception-caught
+    W0611,  # unused-import (kept for optional modules)
+    R0913,  # too-many-arguments
+    R0914,  # too-many-locals
+    R0915,  # too-many-statements
+    R0917,  # too-many-positional-arguments
+    C0301,  # line-too-long (prefer formatter)
+    E1101,  # no-member (Pillow constants)
+    R1731,  # consider-using-max-builtin
+    R1730,  # consider-using-min-builtin
+    C0321,  # multiple-statements
+
+[FORMAT]
+max-line-length=120
+
+[TYPECHECK]
+ignored-modules=waveshare_epd, waveshare_epd.epd7in5b_V2

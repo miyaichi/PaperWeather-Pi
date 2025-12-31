@@ -1,0 +1,40 @@
+{
+  "openweather_appid": "YOUR_OPENWEATHER_APPID",
+  "latitude": 35.6895,
+  "longitude": 139.6917,
+  "locale": "ja_JP",
+  "units": "metric",
+  "display": {
+    "width": 800,
+    "height": 480,
+    "orientation": "landscape"
+  },
+  "fonts": {
+    "main": "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+    "bold": "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
+    "sizes": {
+      "small": 22,
+      "medium": 28,
+      "large": 36,
+      "huge": 68
+    }
+  },
+  "refresh_interval_minutes": 30,
+  "modules": [
+    {
+      "name": "CurrentWeather",
+      "position": [20, 20],
+      "size": [300, 200]
+    },
+    {
+      "name": "Clock",
+      "position": [550, 20],
+      "size": [230, 100]
+    },
+    {
+      "name": "Forecast",
+      "position": [20, 250],
+      "size": [760, 200]
+    }
+  ]
+}

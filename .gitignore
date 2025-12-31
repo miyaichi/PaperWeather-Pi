@@ -1,0 +1,20 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+
+# Environments
+.env
+.venv/
+venv/
+config.json
+
+# OS
+.DS_Store
+
+# Project artifacts
+screen_black.png
+screen_red.png
+screen_preview.png
+
+# Logs
+*.log
