@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css">
+    <title>Weather</title>
+</head>
+<body>
+    <div class="container">
+        <div class="top-bar">
+            <div class="datetime">
+                <div class="date">{{ date_str }}</div>
+                <div class="time">{{ time_str }}</div>
+            </div>
+
+            <div class="sun-moon">
+                <div class="sun-times">
+                    <div class="sun-item">
+                        <div class="label">{{ sunrise_label }}</div>
+                        <div class="value-lg">{{ sunrise_time }}</div>
+                    </div>
+                    <div class="sun-item">
+                        <div class="label">{{ sunset_label }}</div>
+                        <div class="value-lg">{{ sunset_time }}</div>
+                    </div>
+                </div>
+
+                <div class="moon-group">
+                    <img src="file://{{ moon_icon_path }}" class="moon-icon-img" />
+                    <div class="moon-age">{{ moon_age_label }}: {{ moon_age_value }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-section">
+            <div class="current-block">
+                <img src="file://{{ main_icon_path }}" class="main-icon" />
+                <div class="temp-info">
+                    <div class="current-temp">{{ current_temp }}</div>
+                    <div class="description">{{ description }}</div>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-label">{{ humidity_label }}</span>
+                    <span class="stat-value">{{ humidity_val }}%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">{{ pressure_label }}</span>
+                    <span class="stat-value">{{ pressure_val }}hPa</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">{{ wind_label }}</span>
+                    <span class="stat-value">{{ wind_val }}m/s</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">{{ uvi_label }}</span>
+                    <span class="stat-value">{{ uvi_val }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="forecast-section">
+            {% for day in forecast_days %}
+            <div class="forecast-item">
+                <div class="day-name">{{ day.day_name }}</div>
+                <img src="file://{{ day.icon_path }}" class="forecast-icon" />
+                <div class="forecast-temps">
+                    <span class="temp-max">{{ day.max_temp }}°</span>
+                    <span class="temp-min">{{ day.min_temp }}°</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

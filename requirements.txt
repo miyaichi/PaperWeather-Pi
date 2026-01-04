@@ -1,2 +1,5 @@
 pillow
 requests
+selenium
+webdriver-manager
+jinja2
