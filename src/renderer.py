@@ -5,19 +5,20 @@ Renderer - 画像レンダリングモジュール (Headless Chrome版)
 E-Ink用の2色（黒/赤）画像に変換する。
 """
 
+import io
+import logging
+import math
+import os
+from datetime import datetime
+
+import requests
+from jinja2 import Environment, FileSystemLoader
+from PIL import Image, ImageDraw
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
-from jinja2 import Environment, FileSystemLoader
-from PIL import Image, ImageDraw
-import logging
-import os
-import math
-import requests
-from datetime import datetime
-import time
-import io
+
 from i18n import I18n
 
 
@@ -49,7 +50,7 @@ class Renderer:
 
         # Jinja2設定
         template_dir = os.path.join(os.path.dirname(__file__), 'templates')
-        self.jinja_env = Environment(loader=FileSystemLoader(template_dir))
+        self.jinja_env = Environment(loader = FileSystemLoader(template_dir))
 
         # Selenium初期化
         self.driver = self._init_driver()
@@ -62,7 +63,7 @@ class Renderer:
         options.add_argument('--no-sandbox')
         options.add_argument('--hide-scrollbars')
         options.add_argument(f'--window-size={self.width},{self.height}')
-        
+
         # ログ抑制
         options.add_argument("--log-level=3")
 
@@ -71,10 +72,10 @@ class Renderer:
             # try finding existing chromedriver first or use manager
             try:
                 service = Service(ChromeDriverManager().install())
-                driver = webdriver.Chrome(service=service, options=options)
-            except:
-                 # Should fallback to system one if manager fails (e.g. on different arch/offline)
-                 driver = webdriver.Chrome(options=options)
+                driver = webdriver.Chrome(service = service, options = options)
+            except Exception:  # pylint: disable=broad-except
+                # Should fallback to system one if manager fails (e.g. on different arch/offline)
+                driver = webdriver.Chrome(options = options)
 
             logging.info("Selenium WebDriver initialized successfully.")
             return driver
@@ -88,7 +89,7 @@ class Renderer:
         if hasattr(self, 'driver') and self.driver:
             try:
                 self.driver.quit()
-            except:
+            except Exception:  # pylint: disable=broad-except
                 pass
 
     def render(self, weather_data):
@@ -107,11 +108,11 @@ class Renderer:
 
             # 2. CSS生成
             css_template = self.jinja_env.get_template('style.css')
-            css_content = css_template.render(width=self.width, height=self.height)
+            css_content = css_template.render(width = self.width, height = self.height)
 
             # CSS保存（cache/style.css）
             css_path = os.path.join(self.base_dir, 'cache', 'style.css')
-            with open(css_path, 'w', encoding='utf-8') as f:
+            with open(css_path, 'w', encoding = 'utf-8') as f:
                 f.write(css_content)
 
             # 3. HTML生成
@@ -120,13 +121,13 @@ class Renderer:
 
             # 4. HTML保存（cache/render.html）
             html_path = os.path.join(self.base_dir, 'cache', 'render.html')
-            with open(html_path, 'w', encoding='utf-8') as f:
+            with open(html_path, 'w', encoding = 'utf-8') as f:
                 f.write(html_content)
 
             # 5. ブラウザで開く
             url = f"file://{html_path}"
             self.driver.get(url)
-            
+
             # レンダリング待ち（HTMLが大きければ待つ必要があるが、ローカルファイルなので基本即時）
             # フォント読み込み等で遅延がある場合は time.sleep(0.5) を検討
 
@@ -159,15 +160,15 @@ class Renderer:
         dt = datetime.utcfromtimestamp(ts + tz_offset)
         day_en = dt.strftime("%a")
         day_loc = self.i18n(day_en)
-        
+
         # 月齢
         moon_phase = daily_today.get('moon_phase', 0)
         moon_age = moon_phase * 29.53
-        
+
         # アイコン準備 (パスを取得)
         main_icon_code = current.get('weather', [{}])[0].get('icon', '01d')
         main_icon_path = self._ensure_icon(main_icon_code)
-        
+
         moon_icon_path = self._generate_moon_icon_file(moon_age)
 
         # 5日間予報
@@ -177,7 +178,7 @@ class Renderer:
             d_dt = datetime.utcfromtimestamp(d_ts + tz_offset)
             d_day_en = d_dt.strftime("%a")
             d_icon = day.get('weather', [{}])[0].get('icon', '')
-            
+
             forecast_days.append({
                 'day_name': self.i18n(d_day_en),
                 'icon_path': self._ensure_icon(d_icon),
@@ -189,20 +190,16 @@ class Renderer:
         return {
             'date_str': dt.strftime(f"%Y/%m/%d ({day_loc})"),
             'time_str': dt.strftime("%H:%M"),
-            
             'sunrise_label': self.i18n("Sunrise"),
             'sunrise_time': self._fmt_time(current.get('sunrise'), tz_offset),
             'sunset_label': self.i18n("Sunset"),
             'sunset_time': self._fmt_time(current.get('sunset'), tz_offset),
-            
             'moon_icon_path': moon_icon_path,
             'moon_age_label': self.i18n("Age"),
             'moon_age_value': f"{moon_age:.1f}",
-            
             'main_icon_path': main_icon_path,
             'current_temp': f"{current.get('temp', 0):.1f}°C",
             'description': current.get('weather', [{}])[0].get('description', ''),
-            
             'humidity_label': self.i18n("Humidity"),
             'humidity_val': current.get('humidity', 0),
             'pressure_label': self.i18n("Pressure"),
@@ -211,7 +208,6 @@ class Renderer:
             'wind_val': current.get('wind_speed', 0),
             'uvi_label': self.i18n("UV Index"),
             'uvi_val': current.get('uvi', 0),
-            
             'forecast_days': forecast_days
         }
 
@@ -223,35 +219,35 @@ class Renderer:
         """OpenWeatherアイコンをダウンロードし、絶対パスを返す"""
         filename = f"{code}.png"
         path = os.path.join(self.cache_dir, filename)
-        
+
         if not os.path.exists(path):
             url = f"https://openweathermap.org/img/wn/{code}@4x.png"
             try:
-                resp = requests.get(url, timeout=10)
+                resp = requests.get(url, timeout = 10)
                 if resp.status_code == 200:
                     with open(path, 'wb') as f:
                         f.write(resp.content)
             except Exception as e:
                 logging.error(f"Icon download failed {code}: {e}")
-                
+
         return path
 
     def _generate_moon_icon_file(self, age):
         """月齢アイコンを生成して保存し、パスを返す"""
         path = os.path.join(self.cache_dir, "moon_current.png")
-        
+
         # 描画ロジックは既存のものを流用・簡略化
         size = 200
         radius = size // 2
-        
+
         # 背景透明、白黒描画
         # 今回はブラウザで表示するため、白背景に黒で描画する
         image = Image.new("RGB", (size, size), (255, 255, 255))
         draw = ImageDraw.Draw(image)
-        
+
         # 輪郭
-        draw.ellipse([(1, 1), (size-2, size-2)], outline=(0,0,0), width=2)
-        
+        draw.ellipse([(1, 1), (size - 2, size - 2)], outline = (0, 0, 0), width = 2)
+
         # 影
         theta = age / 14.765 * math.pi
         for y in range(-radius, radius, 1):
@@ -262,18 +258,18 @@ class Renderer:
                 alpha = math.acos(val)
                 x = radius * math.sin(alpha)
                 length = radius * math.cos(theta) * math.sin(alpha)
-                
+
                 if age < 15:
                     start = (radius - x, radius + y)
                     end = (radius + length, radius + y)
                 else:
                     start = (radius - length, radius + y)
                     end = (radius + x, radius + y)
-                
-                draw.line((start, end), fill=(0,0,0), width=2)
-            except:
+
+                draw.line((start, end), fill = (0, 0, 0), width = 2)
+            except Exception:  # pylint: disable=broad-except
                 continue
-                
+
         image.save(path)
         return path
 
@@ -296,16 +292,16 @@ class Renderer:
                 # 赤色判定 (赤が強く、緑青が弱い)
                 # 例: rgb(255, 0, 0) -> R>200, G<100, B<100
                 if r > 180 and g < 100 and b < 100:
-                    pixels_red[x, y] = 0 # 赤レイヤーに描画
-                    pixels_blk[x, y] = 1 # 黒レイヤーは白
+                    pixels_red[x, y] = 0  # 赤レイヤーに描画
+                    pixels_blk[x, y] = 1  # 黒レイヤーは白
                 # 黒色判定 (輝度が低い)
                 # ITU-R BT.601の輝度計算式を使用（人間の視覚特性を考慮）
                 # 緑に敏感(0.587)、赤に中程度(0.299)、青に鈍感(0.114)
                 else:
                     luminance = 0.299 * r + 0.587 * g + 0.114 * b
                     if luminance < 128:
-                        pixels_blk[x, y] = 0 # 黒レイヤーに描画
-                        pixels_red[x, y] = 1 # 赤レイヤーは白
+                        pixels_blk[x, y] = 0  # 黒レイヤーに描画
+                        pixels_red[x, y] = 1  # 赤レイヤーは白
                     else:
                         # 白
                         pixels_blk[x, y] = 1
@@ -317,5 +313,5 @@ class Renderer:
         """エラー時の画像生成"""
         img = Image.new('1', (self.width, self.height), 1)
         draw = ImageDraw.Draw(img)
-        draw.text((10, 10), "Renderer Error", fill=0)
+        draw.text((10, 10), "Renderer Error", fill = 0)
         return img, Image.new('1', (self.width, self.height), 1)

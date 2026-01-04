@@ -24,6 +24,7 @@ disable=
     R1731,  # consider-using-max-builtin
     R1730,  # consider-using-min-builtin
     C0321,  # multiple-statements
+    R0902,  # too-many-instance-attributes
 
 [FORMAT]
 max-line-length=120
