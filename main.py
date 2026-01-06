@@ -21,9 +21,9 @@ import sys
 # ロギング設定（INFO以上のメッセージを出力）
 # 他のモジュールをimportする前に設定
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    force=True  # 既存の設定を上書き
+    level = logging.INFO,
+    format = '%(asctime)s - %(levelname)s - %(message)s',
+    force = True  # 既存の設定を上書き
 )
 
 # srcディレクトリをPythonパスに追加（相対インポートのため）
@@ -34,7 +34,7 @@ from display import EInkDisplay
 from renderer import Renderer
 
 
-def load_env_file(path=".env"):
+def load_env_file(path = ".env"):
     """
     .envファイルから環境変数を読み込む
 
@@ -52,7 +52,7 @@ def load_env_file(path=".env"):
     if not os.path.exists(path):
         return
     try:
-        with open(path, "r", encoding="utf-8") as env_file:
+        with open(path, "r", encoding = "utf-8") as env_file:
             for line in env_file:
                 stripped = line.strip()
                 # 空行とコメント行をスキップ
@@ -71,7 +71,7 @@ def load_env_file(path=".env"):
         logging.warning("Failed to load .env; continuing without it")
 
 
-def load_config(path='config.json'):
+def load_config(path = 'config.json'):
     """
     設定ファイルを読み込み、環境変数で上書きする
 
@@ -97,7 +97,7 @@ def load_config(path='config.json'):
         - REFRESH_INTERVAL_MINUTES: 更新間隔（int）
         - FONT_MAIN, FONT_BOLD: フォントパス
     """
-    with open(path, 'r', encoding='utf-8') as f:
+    with open(path, 'r', encoding = 'utf-8') as f:
         config = json.load(f)
 
     # 環境変数による上書き（APIキー、位置情報など）
@@ -118,8 +118,7 @@ def load_config(path='config.json'):
             try:
                 config[key] = float(value)
             except ValueError:
-                logging.warning(
-                    f"Invalid numeric value for {key}, keeping config value.")
+                logging.warning(f"Invalid numeric value for {key}, keeping config value.")
         # 整数型への変換（更新間隔）
         elif key == 'refresh_interval_minutes':
             try:
@@ -170,11 +169,9 @@ def main():
         --config: 設定ファイルのパス（デフォルト: config.json）
         --loop: ループモード（定期的に自動更新）
     """
-    parser = argparse.ArgumentParser(description='WeatherPi E-Ink')
-    parser.add_argument('--config',
-                        default='config.json',
-                        help='Path to config file')
-    parser.add_argument('--loop', action='store_true', help='Run in a loop')
+    parser = argparse.ArgumentParser(description = 'WeatherPi E-Ink')
+    parser.add_argument('--config', default = 'config.json', help = 'Path to config file')
+    parser.add_argument('--loop', action = 'store_true', help = 'Run in a loop')
     args = parser.parse_args()
 
     # .envファイルから環境変数を読み込み（設定ファイル読み込み前に実行）
@@ -206,19 +203,18 @@ def main():
     lang = locale.split('_')[0] if '_' in locale else locale
 
     weather = WeatherFetcher(
-        api_key=config['openweather_appid'],
-        lat=config['latitude'],
-        lon=config['longitude'],
-        units=config['units'],
-        lang=lang  # 言語コード（ja, en, etc.）
+        api_key = config['openweather_appid'],
+        lat = config['latitude'],
+        lon = config['longitude'],
+        units = config['units'],
+        lang = lang  # 言語コード（ja, en, etc.）
     )
 
     # Renderer: 天気データを画像に変換
     renderer = Renderer(config)
 
     # EInkDisplay: E-Inkディスプレイ制御（またはシミュレーション）
-    display = EInkDisplay(width=config['display']['width'],
-                          height=config['display']['height'])
+    display = EInkDisplay(width = config['display']['width'], height = config['display']['height'])
 
     # ディスプレイの初期化
     display.init()

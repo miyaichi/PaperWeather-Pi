@@ -20,6 +20,7 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
 from i18n import I18n
+from eink_converter import EInkConverter
 
 
 class Renderer:
@@ -54,6 +55,9 @@ class Renderer:
 
         # Selenium初期化
         self.driver = self._init_driver()
+
+        # アイコンコンバーター初期化
+        self.icon_converter = EInkConverter()
 
     def _init_driver(self):
         """Selenium WebDriverの初期化"""
@@ -216,21 +220,39 @@ class Renderer:
         return datetime.utcfromtimestamp(ts + offset).strftime("%H:%M")
 
     def _ensure_icon(self, code):
-        """OpenWeatherアイコンをダウンロードし、絶対パスを返す"""
-        filename = f"{code}.png"
-        path = os.path.join(self.cache_dir, filename)
+        """OpenWeatherアイコンをダウンロードし、3色E-Ink用に変換して絶対パスを返す"""
+        base_filename = f"{code}.png"
+        base_path = os.path.join(self.cache_dir, base_filename)
 
-        if not os.path.exists(path):
+        eink_filename = f"{code}_eink.png"
+        eink_path = os.path.join(self.cache_dir, eink_filename)
+
+        # 既に変換済みならそのパスを返す
+        if os.path.exists(eink_path):
+            return eink_path
+
+        # 原本がなければダウンロード
+        if not os.path.exists(base_path):
             url = f"https://openweathermap.org/img/wn/{code}@4x.png"
             try:
                 resp = requests.get(url, timeout = 10)
                 if resp.status_code == 200:
-                    with open(path, 'wb') as f:
+                    with open(base_path, 'wb') as f:
                         f.write(resp.content)
             except Exception as e:
                 logging.error(f"Icon download failed {code}: {e}")
+                return base_path  # 失敗したら仕方ないのでbase_pathを返す（存在しなくても）
 
-        return path
+        # 変換実行
+        if os.path.exists(base_path):
+            try:
+                self.icon_converter.convert(base_path, eink_path)
+                return eink_path
+            except Exception as e:
+                logging.error(f"Icon conversion failed {code}: {e}")
+                return base_path
+
+        return base_path
 
     def _generate_moon_icon_file(self, age):
         """月齢アイコンを生成して保存し、パスを返す"""
