@@ -261,11 +261,4 @@ def main():
 
 
 if __name__ == "__main__":
-    # コマンドライン引数がない場合はデフォルト実行
-    import sys
-    if len(sys.argv) == 1:
-        sys.argv.extend([
-            '/mnt/user-data/uploads/02d.png', '/mnt/user-data/uploads/13n.png', '--preview'
-        ])
-
     main()
