@@ -71,6 +71,22 @@ class Renderer:
         # ログ抑制
         options.add_argument("--log-level=3")
 
+        # Try system installed chromedriver first (common on Raspberry Pi/Linux)
+        system_driver_paths = [
+            '/usr/lib/chromium-browser/chromedriver',
+            '/usr/bin/chromedriver'
+        ]
+        
+        for path in system_driver_paths:
+            if os.path.exists(path):
+                try:
+                    service = Service(path)
+                    driver = webdriver.Chrome(service=service, options=options)
+                    logging.info(f"Initialized Selenium WebDriver using system binary: {path}")
+                    return driver
+                except Exception as e:
+                    logging.warning(f"Failed to use system driver at {path}: {e}")
+
         try:
             # webdriver_managerでドライバを自動取得
             # try finding existing chromedriver first or use manager
